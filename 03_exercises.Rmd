@@ -12,7 +12,7 @@ output:
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
+#knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
 ```
 
 ```{r libraries}
@@ -76,14 +76,23 @@ These exercises will reiterate what you learned in the "Expanding the data wrang
   1. Summarize the `garden_harvest` data to find the total harvest weight in pounds for each vegetable and day of week (HINT: use the `wday()` function from `lubridate`). Display the results so that the vegetables are rows but the days of the week are columns.
 
 ```{r}
-
+garden_harvest %>%
+  mutate(weekday = wday(date, label = TRUE)) %>%
+  group_by(vegetable,weekday) %>%
+  summarize(tot_harvest_lb = sum(weight) * 0.00220462) %>%
+  pivot_wider(names_from = weekday, values_from = tot_harvest_lb)
 ```
 
   2. Summarize the `garden_harvest` data to find the total harvest in pound for each vegetable variety and then try adding the plot from the `garden_planting` table. This will not turn out perfectly. What is the problem? How might you fix it?
 
 ```{r}
-
+garden_harvest %>%
+  group_by(vegetable,variety) %>%
+  summarize(tot_harvest_lb = sum(weight) * 0.00220462) %>%
+  left_join(garden_planting, by = c("vegetable","variety"))
 ```
+The issue with this data is that some varieties of vegetables were planted in multiple plots, so their total harvest in pounds appears in multiple rows. To fix this, we could just set each variety to one of the plots (the first one that appears in garden_planting, for example).
+
 
   3. I would like to understand how much money I "saved" by gardening, for each vegetable type. Describe how I could use the `garden_harvest` and `garden_spending` datasets, along with data from somewhere like [this](https://products.wholefoodsmarket.com/search?sort=relevance&store=10542) to answer this question. You can answer this in words, referencing various join functions. You don't need R code but could provide some if it's helpful.
 
