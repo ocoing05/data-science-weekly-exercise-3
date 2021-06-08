@@ -164,18 +164,61 @@ The issue with this data is that some varieties of vegetables were planted in mu
 
 
   3. I would like to understand how much money I "saved" by gardening, for each vegetable type. Describe how I could use the `garden_harvest` and `garden_spending` datasets, along with data from somewhere like [this](https://products.wholefoodsmarket.com/search?sort=relevance&store=10542) to answer this question. You can answer this in words, referencing various join functions. You don't need R code but could provide some if it's helpful.
+  
+  In order to figure this out, you could group by vegetable and create a new summarized column representing the total weight of each vegetable. Then, you could compute how much buying that amount of veggies would cost from somewhere like the link provided. After this, it would be relatively easy to compare that total price with the total price that you spent on the garden from the garden_spending data.
 
   4. Subset the data to tomatoes. Reorder the tomato varieties from smallest to largest first harvest date. Create a barplot of total harvest in pounds for each variety, in the new order.
 
 
+```r
+garden_harvest %>%
+  filter(vegetable == "tomatoes") %>%
+  group_by(variety) %>%
+  summarize(first_harvest = min(date), total_harvest_lb = sum(weight) * 0.00220462) %>%
+  ggplot(aes(x = total_harvest_lb, y = fct_reorder(variety, first_harvest))) +
+  geom_col() + 
+  labs(x = "Weight (lb)", y = "", title = "Tomato Varieties Harvests")
+```
+
+![](03_exercises_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
 
   5. In the `garden_harvest` data, create two new variables: one that makes the varieties lowercase and another that finds the length of the variety name. Arrange the data by vegetable and length of variety name (smallest to largest), with one row for each vegetable variety. HINT: use `str_to_lower()`, `str_length()`, and `distinct()`.
   
 
+```r
+garden_harvest %>%
+  mutate(lowercase = str_to_lower(variety), variety_name_length = str_length(variety)) %>%
+  group_by(vegetable, variety) %>%
+  summarize(total_weight=sum(weight),lowercase=lowercase,variety_name_length=variety_name_length) %>%
+  distinct() %>%
+  arrange(vegetable, variety_name_length)
+```
+
+```
+## `summarise()` has grouped output by 'vegetable', 'variety'. You can override using the `.groups` argument.
+```
+
+<div data-pagedtable="false">
+  <script data-pagedtable-source type="application/json">
+{"columns":[{"label":["vegetable"],"name":[1],"type":["chr"],"align":["left"]},{"label":["variety"],"name":[2],"type":["chr"],"align":["left"]},{"label":["total_weight"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["lowercase"],"name":[4],"type":["chr"],"align":["left"]},{"label":["variety_name_length"],"name":[5],"type":["int"],"align":["right"]}],"data":[{"1":"apple","2":"unknown","3":"156","4":"unknown","5":"7"},{"1":"asparagus","2":"asparagus","3":"20","4":"asparagus","5":"9"},{"1":"basil","2":"Isle of Naxos","3":"490","4":"isle of naxos","5":"13"},{"1":"beans","2":"Bush Bush Slender","3":"10038","4":"bush bush slender","5":"17"},{"1":"beans","2":"Chinese Red Noodle","3":"356","4":"chinese red noodle","5":"18"},{"1":"beans","2":"Classic Slenderette","3":"1635","4":"classic slenderette","5":"19"},{"1":"beets","2":"leaves","3":"101","4":"leaves","5":"6"},{"1":"beets","2":"Sweet Merlin","3":"2897","4":"sweet merlin","5":"12"},{"1":"beets","2":"Gourmet Golden","3":"3185","4":"gourmet golden","5":"14"},{"1":"broccoli","2":"Yod Fah","3":"372","4":"yod fah","5":"7"},{"1":"broccoli","2":"Main Crop Bravado","3":"967","4":"main crop bravado","5":"17"},{"1":"carrots","2":"Bolero","3":"3761","4":"bolero","5":"6"},{"1":"carrots","2":"Dragon","3":"1862","4":"dragon","5":"6"},{"1":"carrots","2":"greens","3":"169","4":"greens","5":"6"},{"1":"carrots","2":"King Midas","3":"1858","4":"king midas","5":"10"},{"1":"chives","2":"perrenial","3":"8","4":"perrenial","5":"9"},{"1":"cilantro","2":"cilantro","3":"52","4":"cilantro","5":"8"},{"1":"corn","2":"Dorinny Sweet","3":"5174","4":"dorinny sweet","5":"13"},{"1":"corn","2":"Golden Bantam","3":"727","4":"golden bantam","5":"13"},{"1":"cucumbers","2":"pickling","3":"19781","4":"pickling","5":"8"},{"1":"edamame","2":"edamame","3":"2763","4":"edamame","5":"7"},{"1":"hot peppers","2":"thai","3":"67","4":"thai","5":"4"},{"1":"hot peppers","2":"variety","3":"599","4":"variety","5":"7"},{"1":"jalapeño","2":"giant","3":"4478","4":"giant","5":"5"},{"1":"kale","2":"Heirloom Lacinto","3":"2697","4":"heirloom lacinto","5":"16"},{"1":"kohlrabi","2":"Crispy Colors Duo","3":"191","4":"crispy colors duo","5":"17"},{"1":"lettuce","2":"reseed","3":"45","4":"reseed","5":"6"},{"1":"lettuce","2":"Tatsoi","3":"1313","4":"tatsoi","5":"6"},{"1":"lettuce","2":"mustard greens","3":"23","4":"mustard greens","5":"14"},{"1":"lettuce","2":"Lettuce Mixture","3":"2154","4":"lettuce mixture","5":"15"},{"1":"lettuce","2":"Farmer's Market Blend","3":"1725","4":"farmer's market blend","5":"21"},{"1":"onions","2":"Delicious Duo","3":"342","4":"delicious duo","5":"13"},{"1":"onions","2":"Long Keeping Rainbow","3":"1502","4":"long keeping rainbow","5":"20"},{"1":"peas","2":"Magnolia Blossom","3":"3383","4":"magnolia blossom","5":"16"},{"1":"peas","2":"Super Sugar Snap","3":"4340","4":"super sugar snap","5":"16"},{"1":"peppers","2":"green","3":"2582","4":"green","5":"5"},{"1":"peppers","2":"variety","3":"1656","4":"variety","5":"7"},{"1":"potatoes","2":"red","3":"2011","4":"red","5":"3"},{"1":"potatoes","2":"purple","3":"1365","4":"purple","5":"6"},{"1":"potatoes","2":"Russet","3":"4124","4":"russet","5":"6"},{"1":"potatoes","2":"yellow","3":"3357","4":"yellow","5":"6"},{"1":"pumpkins","2":"saved","3":"34896","4":"saved","5":"5"},{"1":"pumpkins","2":"New England Sugar","3":"20348","4":"new england sugar","5":"17"},{"1":"pumpkins","2":"Cinderella's Carraige","3":"14911","4":"cinderella's carraige","5":"21"},{"1":"radish","2":"Garden Party Mix","3":"429","4":"garden party mix","5":"16"},{"1":"raspberries","2":"perrenial","3":"843","4":"perrenial","5":"9"},{"1":"rutabaga","2":"Improved Helenor","3":"13490","4":"improved helenor","5":"16"},{"1":"spinach","2":"Catalina","3":"923","4":"catalina","5":"8"},{"1":"squash","2":"delicata","3":"4762","4":"delicata","5":"8"},{"1":"squash","2":"Red Kuri","3":"10311","4":"red kuri","5":"8"},{"1":"squash","2":"Blue (saved)","3":"18835","4":"blue (saved)","5":"12"},{"1":"squash","2":"Waltham Butternut","3":"11009","4":"waltham butternut","5":"17"},{"1":"strawberries","2":"perrenial","3":"592","4":"perrenial","5":"9"},{"1":"Swiss chard","2":"Neon Glow","3":"3122","4":"neon glow","5":"9"},{"1":"tomatoes","2":"grape","3":"14694","4":"grape","5":"5"},{"1":"tomatoes","2":"Big Beef","3":"11337","4":"big beef","5":"8"},{"1":"tomatoes","2":"Jet Star","3":"6815","4":"jet star","5":"8"},{"1":"tomatoes","2":"Better Boy","3":"15426","4":"better boy","5":"10"},{"1":"tomatoes","2":"Black Krim","3":"7170","4":"black krim","5":"10"},{"1":"tomatoes","2":"Bonny Best","3":"11305","4":"bonny best","5":"10"},{"1":"tomatoes","2":"Brandywine","3":"7097","4":"brandywine","5":"10"},{"1":"tomatoes","2":"Old German","3":"12119","4":"old german","5":"10"},{"1":"tomatoes","2":"volunteers","3":"23411","4":"volunteers","5":"10"},{"1":"tomatoes","2":"Amish Paste","3":"29789","4":"amish paste","5":"11"},{"1":"tomatoes","2":"Cherokee Purple","3":"7127","4":"cherokee purple","5":"15"},{"1":"tomatoes","2":"Mortgage Lifter","3":"11941","4":"mortgage lifter","5":"15"},{"1":"zucchini","2":"Romanesco","3":"45227","4":"romanesco","5":"9"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
 
   6. In the `garden_harvest` data, find all distinct vegetable varieties that have "er" or "ar" in their name. HINT: `str_detect()` with an "or" statement (use the | for "or") and `distinct()`.
 
 
+```r
+garden_harvest %>%
+  filter(str_detect(variety, "(e|a)r")) %>%
+  select(vegetable, variety) %>%
+  distinct()
+```
+
+<div data-pagedtable="false">
+  <script data-pagedtable-source type="application/json">
+{"columns":[{"label":["vegetable"],"name":[1],"type":["chr"],"align":["left"]},{"label":["variety"],"name":[2],"type":["chr"],"align":["left"]}],"data":[{"1":"radish","2":"Garden Party Mix"},{"1":"lettuce","2":"Farmer's Market Blend"},{"1":"peas","2":"Super Sugar Snap"},{"1":"chives","2":"perrenial"},{"1":"strawberries","2":"perrenial"},{"1":"asparagus","2":"asparagus"},{"1":"lettuce","2":"mustard greens"},{"1":"raspberries","2":"perrenial"},{"1":"beans","2":"Bush Bush Slender"},{"1":"beets","2":"Sweet Merlin"},{"1":"hot peppers","2":"variety"},{"1":"tomatoes","2":"Cherokee Purple"},{"1":"tomatoes","2":"Better Boy"},{"1":"peppers","2":"variety"},{"1":"tomatoes","2":"Mortgage Lifter"},{"1":"tomatoes","2":"Old German"},{"1":"tomatoes","2":"Jet Star"},{"1":"carrots","2":"Bolero"},{"1":"tomatoes","2":"volunteers"},{"1":"beans","2":"Classic Slenderette"},{"1":"pumpkins","2":"Cinderella's Carraige"},{"1":"squash","2":"Waltham Butternut"},{"1":"pumpkins","2":"New England Sugar"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
 
 
 ## Bicycle-Use Patterns
