@@ -270,24 +270,69 @@ It's natural to expect that bikes are rented more at some times of day, some day
   7. A density plot, which is a smoothed out histogram, of the events versus `sdate`. Use `geom_density()`.
   
 
+```r
+Trips %>%
+  ggplot(aes(sdate)) +
+  geom_density()
+```
+
+![](03_exercises_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
   
   8. A density plot of the events versus time of day.  You can use `mutate()` with `lubridate`'s  `hour()` and `minute()` functions to extract the hour of the day and minute within the hour from `sdate`. Hint: A minute is 1/60 of an hour, so create a variable where 3:30 is 3.5 and 3:45 is 3.75.
   
 
+```r
+Trips %>%
+  mutate(time = hour(sdate) + minute(sdate)/60) %>%
+  ggplot(aes(time)) +
+  geom_density()
+```
+
+![](03_exercises_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
   
   9. A bar graph of the events versus day of the week. Put day on the y-axis.
   
 
+```r
+Trips %>%
+  mutate(weekday = wday(sdate, label = TRUE, abbr = TRUE)) %>%
+  ggplot(aes(y = weekday)) +
+  geom_bar()
+```
+
+![](03_exercises_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
   
   10. Facet your graph from exercise 8. by day of the week. Is there a pattern?
   
 
+```r
+Trips %>%
+  mutate(time = hour(sdate) + minute(sdate)/60, weekday = wday(sdate, label=TRUE,abbr=TRUE)) %>%
+  ggplot(aes(time)) +
+  geom_density() +
+  facet_wrap(~weekday)
+```
+
+![](03_exercises_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+  
+  On weekdays, there are two spikes, around 8am and 6pm, while between these times there is a dip, probably because people are going to work. On the weekends, however, there is a singular curve which is a smoother/more gradual spike, which reaches its peak around 2pm.
   
 The variable `client` describes whether the renter is a regular user (level `Registered`) or has not joined the bike-rental organization (`Causal`). The next set of exercises investigate whether these two different categories of users show different rental behavior and how `client` interacts with the patterns you found in the previous exercises. 
 
   11. Change the graph from exercise 10 to set the `fill` aesthetic for `geom_density()` to the `client` variable. You should also set `alpha = .5` for transparency and `color=NA` to suppress the outline of the density function.
   
 
+```r
+Trips %>%
+  mutate(time = hour(sdate) + minute(sdate)/60, weekday = wday(sdate, label=TRUE,abbr=TRUE)) %>%
+  ggplot() +
+  geom_density(aes(x = time, fill = client), alpha = .5, color = NA) +
+  facet_wrap(~weekday)
+```
+
+![](03_exercises_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
+
+The casual clients follow what I previously noticed as the pattern in weekends, a singular more gradual spike, on the weekdays as well as weekends.
 
   12. Change the previous graph by adding the argument `position = position_stack()` to `geom_density()`. In your opinion, is this better or worse in terms of telling a story? What are the advantages/disadvantages of each?
   
